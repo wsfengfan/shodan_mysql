@@ -162,7 +162,7 @@ Operating System: {}""".format(host['ip_str'], host.get('isp', 'n/a'), host.get(
     context_string = "IP: "+str(host['ip_str'])+"\nOS: "+str(host.get('os', 'n/a'))+"\nCountry: "+str(host.get('country_name', 'n/a'))+"\nISP: "+str(host.get('isp', 'n/a'))+"\nOrganization: "+str(host.get('org', 'n/a'))+"\nPORT: "+str(ip_ports)+"\n"+str(context)
 
     try:
-        db = pymysql.connect("192.168.10.113", "root", "Wdmm123", "test1")
+        db = pymysql.connect("192.168.10.113", "root", "password", "test1")
         cursor = db.cursor()
         string1 = cursor.mogrify("INSERT INTO `shodan_ip`(`ip`,`data`) VALUES(%s, %s);", (host['ip_str'], context_string))
         cursor.execute(string1)
@@ -292,7 +292,7 @@ def shodan_string_search(shodan_search_object, shodan_search_string,
         context_string = str(context_string)
 
     try:
-        db = pymysql.connect("192.168.10.113", "root", "Wdmm123", "test1")
+        db = pymysql.connect("192.168.10.113", "root", "password", "test1")
         cursor = db.cursor()
         string1 = cursor.mogrify("INSERT INTO `shodan_string`(`hostname`,`data`) VALUES(%s, %s);", (shodan_search_string, context_string))
         cursor.execute(string1)
