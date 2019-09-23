@@ -8,8 +8,8 @@ import re
 
 myname = socket.gethostname()
 myaddr = socket.gethostbyname(myname)
-name = "MAC: "+str(myname)+" IP: "+str(myaddr)+" OS: "+str(platform.system())
-print(name)
+nameID = "MAC: "+str(myname)+" IP: "+str(myaddr)+" OS: "+str(platform.system())
+print(nameID)
 
 def TestOs():
     print("------------Operation System----------------")
@@ -103,7 +103,7 @@ def UseLin():
     try:
         db = pymysql.connect("192.168.10.113", "root", "Wdmm123", "test1")
         cursor = db.cursor()
-        string4 = mogrify("INSERT INTO ``(`Hostname`,`Network`,`Port`,`User`,`Process`,`Passwd`,`Shadow`,`Kernel_version`,`Lsb_release`,`Login_info`,`DNS`,`Service_Process`,`Firewall`) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);", (Hostname,Network,Port,User,Process,Passwd,Shadow,Kernel_version,Lsb_release,Login_info,DNS,Service_Process,Firewall))
+        string4 = mogrify("INSERT INTO `server_test`(`Hostname`,`Network`,`Port`,`User`,`Process`,`Passwd`,`Shadow`,`Kernel_version`,`Lsb_release`,`Login_info`,`DNS`,`Service_Process`,`Firewall`,`nameID`) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);", (Hostname,Network,Port,User,Process,Passwd,Shadow,Kernel_version,Lsb_release,Login_info,DNS,Service_Process,Firewall,nameID))
         cursor.execute(string4)
         cursor.connection.commit()
         db.close()
@@ -112,7 +112,7 @@ def UseLin():
 
 def UseWin():
     os.system("check_server_windows.vbs")
-    time.sleep(75)
+    time.sleep(90)
     
     f = open("ip_gdsxxaqcpzx_window.xml", "r")
     fr = f.read()
@@ -179,7 +179,7 @@ def UseWin():
     try:
         db = pymysql.connect("192.168.10.113", "root", "Wdmm123", "test1")
         cursor = db.cursor()
-        string4 = mogrify("INSERT INTO ``(`User`,`Process`,`Firewall`,`Port`,`Install_Procduce`,`Computer_list`,`Patch`,`Disk`,`Route`,`Network`,`Sys_info`) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);", (User,Process,Firewall,Port,Install_Procduce,Computer_list,Patch,Disk,Route,Network,Sys_info))
+        string4 = mogrify("INSERT INTO `server_test`(`User`,`Process`,`Firewall`,`Port`,`Install_Procduce`,`Computer_list`,`Patch`,`Disk`,`Route`,`Network`,`Sys_info`,`nameID`) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);", (User,Process,Firewall,Port,Install_Procduce,Computer_list,Patch,Disk,Route,Network,Sys_info,nameID))
         cursor.execute(string4)
         cursor.connection.commit()
         db.close()

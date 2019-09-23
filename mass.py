@@ -3,6 +3,13 @@
 
 import getopt,sys,Queue,threading,socket,struct,urllib2,time,os,re,json,base64,cgi,array,ssl
 import pymysql
+import socket
+import uuid
+
+myname = socket.gethostname()
+myaddr = socket.gethostbyname(myname)
+nameID = "MAC: "+str(myname)+" IP: "+str(myaddr)+" OS: "+str(platform.system())
+print(nameID)
 
 queue = Queue.Queue()
 mutex = threading.Lock()
@@ -282,12 +289,11 @@ def get_port_list(port):
     else:
         port_list = port.split(',')
     return port_list
-def write_result(ip):
+def write_result():
     re_json = []
     re_array = {}
     td = ''
-    ip = str(ip)
-    data= ''
+    data = ""
     try:
         ip_list = re_data.keys()
         ip_list.sort()
@@ -315,17 +321,24 @@ def write_result(ip):
             result = open(ip + "-" + str(int(time.time())) + ".html","w")
             result.write(mo_html)
             result.close()
-           
-        fr = str(data)
+    except Exception,e:
+        print 'Results output failure'
+        
+    fr = str(data)
+    print("--------------------------------------")
+    print(fr)
+        
+    try:
         db = pymysql.connect("192.168.10.113", "root", "Wdmm123", "test1")
         cursor = db.cursor()
-        string1 = cursor.mogrify("INSERT INTO `ip_port`(`ip`,`data`) VALUES(%s,%s);", (ip, fr))
+        string1 = cursor.mogrify("UPDATE `server_test` SET `Survive_ip` = %s WHERE `nameID` = %s;", (fr, nameID));
         cursor.execute(string1)
         cursor.connection.commit()
         db.close()
-
-    except Exception,e:
-        print 'Results output failure'
+    except:
+        print("mysql insert error")
+        
+        
 def t_join(m_count):
     tmp_count = 0
     i = 0
@@ -352,7 +365,7 @@ Usage: python F-NAScan.py -h 192.168.1 [-p 21,80,3306] [-m 50] [-t 10] [-n]
         options,args = getopt.getopt(sys.argv[1:],"h:p:m:t:n")
         ip = ''
         noping = False
-        port = '21,22,23,25,53,80,81,82,83,84,85,86,87,88,110,135,139,143,389,443,445,465,873,993,995,1080,1723,1433,1521,3306,3389,3690,5432,5800,5900,6379,7001,7002,7080,8000,8001,8070,8080,8082,8088,8081,8888,8090,9200,9300,9080,9999,11211,27017'
+        port = '21,22,23,25,53,80,81,82,83,84,85,86,87,88,110,139,143,389,443,445,465,873,993,995,1080,1723,1433,1521,3306,3389,3690,5432,5800,5900,6379,7001,7002,7080,8000,8001,8070,8080,8081,8888,8090,9200,9300,9080,9999,11211,27017'
         m_count = 100
         for opt,arg in options:
             if opt == '-h':
@@ -377,7 +390,7 @@ Usage: python F-NAScan.py -h 192.168.1 [-p 21,80,3306] [-m 50] [-t 10] [-n]
                 t.setDaemon(True)
                 t.start()
             t_join(m_count)
-            write_result(ip)
+            write_result()
     except Exception,e:
         print e
         print msg
