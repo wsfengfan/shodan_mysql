@@ -1,9 +1,10 @@
 #coding:utf-8
 #author:wolf@future-sec
 
-import getopt,sys,Queue,threading,socket,struct,urllib2,time,os,re,json,base64,cgi,array,ssl
+import getopt,sys,queue,threading,socket,struct,urllib.request,urllib.error,urllib.parse,time,os,re,json,base64,cgi,array,ssl
 import pymysql
 import socket
+import platform
 import uuid
 
 myname = socket.gethostname()
@@ -11,7 +12,7 @@ myaddr = socket.gethostbyname(myname)
 nameID = "MAC: "+str(myname)+" IP: "+str(myaddr)+" OS: "+str(platform.system())
 print(nameID)
 
-queue = Queue.Queue()
+queue = queue.Queue()
 mutex = threading.Lock()
 timeout = 10
 port_list = []
@@ -110,7 +111,7 @@ def get_ac_ip(ip_list):
         ipPool = set(ip_list)
         return s.mPing(ipPool)
     except:
-        print 'The current user permissions unable to send icmp packets'
+        print('The current user permissions unable to send icmp packets')
         return ip_list
 class ThreadNum(threading.Thread):
     def __init__(self,queue):
@@ -127,14 +128,14 @@ class ThreadNum(threading.Thread):
                 task_host,task_port = queue_task.split(":")
                 data = scan_port(task_host,task_port)
                 if data:
-                    if data <> 'NULL':
-                        port_data[task_host + ":" + task_port] = urllib2.quote(data)
+                    if data != 'NULL':
+                        port_data[task_host + ":" + task_port] = urllib.parse.quote(data)
                     server_type = server_discern(task_host,task_port,data)
                     if not server_type:
                         h_server,title = get_web_info(task_host,task_port)
                         if title or h_server:server_type = 'web ' + title
                     if server_type:log('server',task_host,task_port,server_type.strip())
-            except Exception,e:
+            except Exception as e:
                 continue
 def get_code(header,html):
     try:
@@ -144,7 +145,7 @@ def get_code(header,html):
     except:
         pass
     try:
-        if header.has_key('Content-Type'):
+        if 'Content-Type' in header:
             Content_Type = header['Content-Type']
             m = re.search(r'.*?charset\=(.*?)(;|$)',Content_Type,flags=re.I)
             if m:return m.group(1)
@@ -153,12 +154,12 @@ def get_code(header,html):
 def get_web_info(host,port):
     h_server,h_xpb,title_str,html = '','','',''
     try:
-        info = urllib2.urlopen("http://%s:%s"%(host,port),timeout=timeout)
+        info = urllib.request.urlopen("http://%s:%s"%(host,port),timeout=timeout)
         html = info.read()
         header = info.headers
-    except urllib2.HTTPError,e:
+    except urllib.error.HTTPError as e:
         header = e.headers
-    except Exception,e:
+    except Exception as e:
         return False,False
     if not header:return False,False
     try:
@@ -168,10 +169,10 @@ def get_web_info(host,port):
     except:
         pass
     try:
-        port_data[host + ":" + str(port)] = urllib2.quote(str(header) + "\r\n\r\n" + cgi.escape(html))
+        port_data[host + ":" + str(port)] = urllib.parse.quote(str(header) + "\r\n\r\n" + cgi.escape(html))
         title = re.search(r'<title>(.*?)</title>', html, flags=re.I|re.M)
         if title:title_str=title.group(1)
-    except Exception,e:
+    except Exception as e:
         pass
     return str(header),title_str
 def scan_port(host,port):
@@ -180,7 +181,7 @@ def scan_port(host,port):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect((str(host),int(port)))
         log('portscan',host,port)
-    except Exception,e:
+    except Exception as e:
         return False
     try:
         data = sock.recv(512)
@@ -189,21 +190,21 @@ def scan_port(host,port):
             return data
         else:
             return 'NULL'
-    except Exception,e:
+    except Exception as e:
         return 'NULL'
 def log(scan_type,host,port,info=''):
     mutex.acquire()
     try:
         time_str = time.strftime('%X', time.localtime(time.time()))
         if scan_type == 'portscan':
-            print "[%s] %s:%d open"%(time_str,host,int(port))
+            print("[%s] %s:%d open"%(time_str,host,int(port)))
             try:
                 re_data[host].append(port)
             except KeyError:
                 re_data[host]=[]
                 re_data[host].append(port)
         elif scan_type == 'server':
-            print "[%s] %s:%d is %s"%(time_str,host,int(port),str(info))
+            print("[%s] %s:%d is %s"%(time_str,host,int(port),str(info)))
             try:
                 server = info.split(" ")[0].replace("(default)","")
                 statistics[server] += 1
@@ -212,8 +213,8 @@ def log(scan_type,host,port,info=''):
             re_data[host].remove(port)
             re_data[host].append(str(port) + " " + str(info))
         elif scan_type == 'active':
-            print "[%s] %s active"%(time_str,host)
-    except Exception,e:
+            print("[%s] %s active"%(time_str,host))
+    except Exception as e:
         pass
     mutex.release()
 def read_config(config_type):
@@ -227,7 +228,7 @@ def read_config(config_type):
             config_file.close()
             return mark_list
         except:
-            print 'Configuration file read failed'
+            print('Configuration file read failed')
             exit()
 def server_discern(host,port,data):
     server = ''
@@ -235,12 +236,12 @@ def server_discern(host,port,data):
         try:
             name,default_port,reg = mark_info
             if int(default_port) == int(port):server = name+"(default)"
-            if reg and data <> 'NULL':
+            if reg and data != 'NULL':
                 matchObj = re.search(reg,data,re.I|re.M)
                 if matchObj:server = name
                 if server:
                     return server
-        except Exception,e:
+        except Exception as e:
             continue
     return server
 def get_ip_list(ip):
@@ -249,14 +250,14 @@ def get_ip_list(ip):
     numtoip = lambda x: '.'.join([str(x/(256**i)%256) for i in range(3,-1,-1)])
     if '-' in ip:
         ip_range = ip.split('-')
-        ip_start = long(iptonum(ip_range[0]))
-        ip_end = long(iptonum(ip_range[1]))
+        ip_start = int(iptonum(ip_range[0]))
+        ip_end = int(iptonum(ip_range[1]))
         ip_count = ip_end - ip_start
         if ip_count >= 0 and ip_count <= 65536:
             for ip_num in range(ip_start,ip_end+1):
                 ip_list.append(numtoip(ip_num))
         else:
-            print '-h wrong format'
+            print('-h wrong format')
     elif '.ini' in ip:
         ip_config = open(ip,'r')
         for ip in ip_config:
@@ -277,7 +278,7 @@ def get_ip_list(ip):
         elif net ==4:
             ip_list.append(ip)
         else:
-            print "-h wrong format"
+            print("-h wrong format")
     return ip_list
 def get_port_list(port):
     port_list = []
@@ -295,7 +296,7 @@ def write_result():
     td = ''
     data = ""
     try:
-        ip_list = re_data.keys()
+        ip_list = list(re_data.keys())
         ip_list.sort()
         for ip_str in ip_list:
             port_array = []
@@ -303,7 +304,7 @@ def write_result():
                 port_array.append({"name":port_str,"url":"javascript:view('%s');"%(ip_str + ":" + port_str.split(" ")[0])})
                 data += "IP: "+str(ip_str)+" PORT: "+str(port_str)+" \n"
             ip_array = {"name":ip_str,"submenu":port_array}
-            if re_array.has_key(ip_str[0:ip_str.rindex('.')]+'.*'):
+            if ip_str[0:ip_str.rindex('.')]+'.*' in re_array:
                 re_array[ip_str[0:ip_str.rindex('.')]+'.*'].append(ip_array)
             else:
                 re_array[ip_str[0:ip_str.rindex('.')]+'.*']=[]
@@ -321,8 +322,8 @@ def write_result():
             result = open(ip + "-" + str(int(time.time())) + ".html","w")
             result.write(mo_html)
             result.close()
-    except Exception,e:
-        print 'Results output failure'
+    except Exception as e:
+        print('Results output failure')
         
     fr = str(data)
     print("--------------------------------------")
@@ -360,7 +361,7 @@ Scanning a network asset information script,author:wolf@future-sec.
 Usage: python F-NAScan.py -h 192.168.1 [-p 21,80,3306] [-m 50] [-t 10] [-n]
     '''
     if len(sys.argv) < 2:
-        print msg
+        print(msg)
     try:
         options,args = getopt.getopt(sys.argv[1:],"h:p:m:t:n")
         ip = ''
@@ -391,7 +392,7 @@ Usage: python F-NAScan.py -h 192.168.1 [-p 21,80,3306] [-m 50] [-t 10] [-n]
                 t.start()
             t_join(m_count)
             write_result()
-    except Exception,e:
-        print e
-        print msg
+    except Exception as e:
+        print(e)
+        print(msg)
 

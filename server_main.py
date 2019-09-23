@@ -103,7 +103,7 @@ def UseLin():
     try:
         db = pymysql.connect("192.168.10.113", "root", "Wdmm123", "test1")
         cursor = db.cursor()
-        string4 = mogrify("INSERT INTO `server_test`(`Hostname`,`Network`,`Port`,`User`,`Process`,`Passwd`,`Shadow`,`Kernel_version`,`Lsb_release`,`Login_info`,`DNS`,`Service_Process`,`Firewall`,`nameID`) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);", (Hostname,Network,Port,User,Process,Passwd,Shadow,Kernel_version,Lsb_release,Login_info,DNS,Service_Process,Firewall,nameID))
+        string4 = cursor.mogrify("INSERT INTO `server_test`(`Hostname`,`Network`,`Port`,`User`,`Process`,`Passwd`,`Shadow`,`Kernel_version`,`Lsb_release`,`Login_info`,`DNS`,`Service_Process`,`Firewall`,`nameID`) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);", (Hostname,Network,Port,User,Process,Passwd,Shadow,Kernel_version,Lsb_release,Login_info,DNS,Service_Process,Firewall,nameID))
         cursor.execute(string4)
         cursor.connection.commit()
         db.close()
@@ -176,15 +176,13 @@ def UseWin():
             
     print(User,Process,Firewall,Port,Install_Procduce,Computer_list,Patch,Disk,Route,Network,Sys_info)
     
-    try:
-        db = pymysql.connect("192.168.10.113", "root", "Wdmm123", "test1")
-        cursor = db.cursor()
-        string4 = mogrify("INSERT INTO `server_test`(`User`,`Process`,`Firewall`,`Port`,`Install_Procduce`,`Computer_list`,`Patch`,`Disk`,`Route`,`Network`,`Sys_info`,`nameID`) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);", (User,Process,Firewall,Port,Install_Procduce,Computer_list,Patch,Disk,Route,Network,Sys_info,nameID))
-        cursor.execute(string4)
-        cursor.connection.commit()
-        db.close()
-    except:
-        print("window mysql insert error")
+    
+    db = pymysql.connect("192.168.10.113", "root", "Wdmm123", "test1")
+    cursor = db.cursor()
+    string4 = cursor.mogrify("INSERT INTO `server_test`(`User`,`Process`,`Firewall`,`Port`,`Install_Procduce`,`Computer_list`,`Patch`,`Disk`,`Route`,`Network`,`Sys_info`,`nameID`) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);", (User,Process,Firewall,Port,Install_Procduce,Computer_list,Patch,Disk,Route,Network,Sys_info,nameID))
+    cursor.execute(string4)
+    cursor.connection.commit()
+    db.close()
     
 
 if __name__ == "__main__":
