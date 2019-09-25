@@ -13,8 +13,8 @@ from email.utils import parseaddr
   
   
 # 输入邮件地址, 口令和POP3服务器地址: 
-email = 'fengf@gditsec.org.cn'
-password = 'Wdmm123!@#'
+email = ''
+password = ''
 pop3_server = 'imap.exmail.qq.com'
   
   
